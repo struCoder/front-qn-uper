@@ -11,8 +11,18 @@
 **客户端**
 ```javascript
 var options = {
-	domain: '七牛分配给你的域名',
-	tokenUrl: '你的服务器上获取uptoken的访问地址'
+	//must
+	domain: '七牛分配给你的域名', 
+
+	//must
+	tokenUrl: '你的服务器上获取uptoken的访问地址', 
+	key: '对图片名字的自定义',  //option
+
+	// option , 比如: 'font-qn-uper/'. 访问地址就是:http:domain/prefix/filename
+	prefix: '自定义的路径',
+
+	//option, 默认5000ms
+	timeout: '请求超时时间' 
 }
 var ins = new fontQnUper(options);
 $('#upload').on('change', function() {
