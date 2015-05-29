@@ -22,11 +22,23 @@ var options = {
 	prefix: '自定义的路径',
 
 	//option, 默认5000ms
-	timeout: '请求超时时间' 
+	timeout: '请求超时时间' ,
+
+	//option, 默认480px
+	maxMobileWidth: '在手机上最大显示宽度',
+
+	//option, 默认960px
+	maxPcWidth: '在pc端最大显示宽度'
 }
 var ins = new fontQnUper(options);
 $('#upload').on('change', function() {
 	var file = this.files[0];
+
+	// 错误捕捉
+	ins.errHandle = function(e) {
+		console.log(e.msg, e);
+	}
+
 	ins.post(file, function(err, result) {
 		if (err) {
 			console.log(err)
@@ -35,7 +47,9 @@ $('#upload').on('change', function() {
 			{
 				hash: "", 
 				key: "", 
-				imageUrl: ""
+				fullImageUrl: "完整的上传图片",
+				mobileImageUrl:"手机上显示的图片",
+				pcImageUrl:"pc端显示的图片"
 			}
 		*/
 	});
