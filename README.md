@@ -28,7 +28,10 @@ var options = {
 	maxMobileWidth: '在手机上最大显示宽度',
 
 	//option, 默认960px
-	maxPcWidth: '在pc端最大显示宽度'
+	maxPcWidth: '在pc端最大显示宽度',
+
+	//option, 格式比如: "jpg, png, jpeg"
+	imageType: "文件类型"
 }
 var ins = new fontQnUper(options);
 $('#upload').on('change', function() {

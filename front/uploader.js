@@ -1,6 +1,7 @@
 (function() {
 	var STR_RAND = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
-
+	var DEFAULT_IMG = ['jpg', 'jpeg', 'gif', 'png', 'bmp'];
+	
 	var genRand = function(len) {
 		len = len || 16;
 		var resultStr = '';
@@ -16,6 +17,12 @@
 		if (Object.prototype.toString.call(options) !== '[object Object]') {
 			throw new Error('options must be Object')
 		}
+		if (options.imageType) {
+			this.imageTypeArr = options.imageType.split(',');
+		} else {
+			this.imageTypeArr = DEFAULT_IMG;
+		}
+		
 		this.domain = options.domain; //must
 		this.url = options.tokenUrl; // must
 		this.key = options.key || genRand();
@@ -52,9 +59,18 @@
 	// 	}
 	// }
 
+	upload.prototype.checkType = function() {
+		var fileName = this.file.name;
+		var imgExt = fileName.substring(fileName.lastIndexOf('.') + 1).toLowerCase();
+		if (this.imageTypeArr.indexOf(imgExt) === -1) {
+			return false;
+		}
+		return true;
+	};
+
 	upload.prototype._getToken = function() {
 		var xhr = this.createAjax();
-		self = this;
+		var self = this;
 		xhr.open('GET', this.url, true);
 		xhr.onreadystatechange = function() {
 			if (xhr.readyState === 4 && xhr.status === 200) {
@@ -81,6 +97,11 @@
 	upload.prototype.post = function(file, cb) {
 		this.file = file;
 		var self = this;
+		if (!this.checkType()) {
+			if (typeof this.errHandle === 'function') {
+				return this.errHandle('图片格式为下面的一种:  ' + this.imageTypeArr.toString());
+			}
+		}
 		if (!this._xhr) {
 			this._xhr = this.createAjax();
 		}
