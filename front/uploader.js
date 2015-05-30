@@ -98,9 +98,11 @@
 		this.file = file;
 		var self = this;
 		if (!this.checkType()) {
+			var errInfo = '图片格式为下面的一种:  ' + this.imageTypeArr.toString();
 			if (typeof this.errHandle === 'function') {
-				return this.errHandle('图片格式为下面的一种:  ' + this.imageTypeArr.toString());
+				return this.errHandle(errInfo);
 			}
+			return cb(errInfo);
 		}
 		if (!this._xhr) {
 			this._xhr = this.createAjax();
