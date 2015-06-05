@@ -33,11 +33,12 @@
 		xhr.onload = function() {
 			if (xhr.status === 200) {
 				try {
-					cb(null, JSON.parse(xhr.responseText));
+					var jsonResult = JSON.parse(xhr.responseText);
 				} catch(e) {
 					e.msg = 'parse text to json error';
 					cb(e);
 				}
+				cb(null, jsonResult);
 			}
 		}
 
