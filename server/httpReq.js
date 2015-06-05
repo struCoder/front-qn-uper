@@ -30,6 +30,17 @@ function hmacSha1 (encodedFlags, secretKey) {
 	var hmac = crypto.createHmac('sha1', secretKey);
 	return hmac.update(encodedFlags).digest('base64');
 }
+
+// module.exports = function() {
+// 	var flags = getFlags();
+// 	var encodedFlags = urlsafeBase64Encode(JSON.stringify(flags));
+// 	var encoded = hmacSha1(encodedFlags, config.SECRET_KEY);
+// 	var encodedSign = base64ToUrlSafe(encoded);
+// 	var tokenInfo = {
+// 		uptoken: config.ACCESS_KEY + ':' + encodedSign + ':' + encodedFlags
+// 	}
+// 	return tokenInfo;
+// }
 WebApp.connectHandlers.use('/cmeteor-token', function(req, res) {
 	var flags = getFlags();
 	var encodedFlags = urlsafeBase64Encode(JSON.stringify(flags));

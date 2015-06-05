@@ -16,7 +16,7 @@ var options = {
 
 	//must
 	tokenUrl: '你的服务器上获取uptoken的访问地址', 
-	key: '对图片名字的自定义',  //option
+	maxImgSize: '最大图片大小',  //option
 
 	// option , 比如: 'font-qn-uper/'. 访问地址就是:http:domain/prefix/filename
 	prefix: '自定义的路径',
@@ -39,13 +39,10 @@ $('#upload').on('change', function() {
 
 	// 错误捕捉
 	ins.errHandle = function(e) {
-		console.log(e.msg, e);
+		console.log(e);
 	}
 
-	ins.post(file, function(err, result) {
-		if (err) {
-			console.log(err)
-		}
+	ins.post(file, function(result) {
 		/*result datas
 			{
 				hash: "", 

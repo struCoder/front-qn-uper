@@ -1,6 +1,7 @@
 (function() {
 	var STR_RAND = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
 	var DEFAULT_IMG = ['jpg', 'jpeg', 'gif', 'png', 'bmp'];
+	var DEFAULT_SIZE = 10 * 1024;	// 10MB
 	
 	var genRand = function(len) {
 		len = len || 16;
@@ -13,7 +14,50 @@
 		}
 		return resultStr;
 	}
-	var upload = function(options) {
+
+	var createAjax = function() {
+		var xmlhttp = {};
+		if (window.XMLHttpRequest) {
+			xmlhttp = new XMLHttpRequest();
+		} else {
+			xmlhttp = new ActiveXObject("Microsoft.XMLHTTP");
+		}
+		xmlhttp.timeout = this.timeout;
+		return xmlhttp;
+	}
+
+	var request = function(options, cb) {
+		var self = this;
+		var xhr = createAjax();
+		xhr.open(options.method, options.url, true);
+		xhr.onload = function() {
+			if (xhr.status === 200) {
+				try {
+					cb(null, JSON.parse(xhr.responseText));
+				} catch(e) {
+					e.msg = 'parse text to json error';
+					cb(e);
+				}
+			}
+		}
+
+		xhr.ontimeout = function() {
+			cb('timeout');
+		}
+
+		xhr.onerror = function(e) {
+			e.msg = 'network error not frontQnUper self error';
+			cb(e);
+		}
+		if (options.onProgress) {
+			xhr.upload.onprogress = function(e) {
+				self.progress(e.total, e.loaded);
+			}
+		}
+		xhr.send(options.method === 'POST' ? options.data : null);
+	}
+
+	var qnUpload = function(options) {
 		if (Object.prototype.toString.call(options) !== '[object Object]') {
 			throw new Error('options must be Object')
 		}
@@ -25,132 +69,87 @@
 		
 		this.domain = options.domain; //must
 		this.url = options.tokenUrl; // must
-		this.key = options.key || genRand();
 		this.prefix = options.prefix || 'font-qn-uper/';
 		this.timeout = options.timeout || 5000; // By default 5000ms
 		this.maxMobileWidth = options.maxWidth || 480;
 		this.maxPcWidth = options.maxPcWidth || 960;
+		this.defaultSize = parseInt(options.maxImgSize, 10)  || 10 * 1024;
 		this.uploadUrl = 'http://upload.qiniu.com/?token=';
-		this._getToken();
+		// this._getToken()
 	}
 
-	upload.prototype.createAjax = function() {
-		var xmlhttp = {};
-		if (window.XMLHttpRequest) {
-			xmlhttp = new XMLHttpRequest();
-		} else {
-			xmlhttp = new ActiveXObject("Microsoft.XMLHTTP");
-		}
-		xmlhttp.timeout = this.timeout;
-		return xmlhttp;
-	}
-
-	// upload.prototype._DefaultHeaders = function() {
-	// 	var headers = {
-	// 		'Authorization': this.token.uptoken
-	// 	}
-	// 	return headers;
-	// }
-
-	// upload.prototype.setHttpHeaders = function(extendHeaders) {
-	// 	var _resultHeaders = _.extend(this._DefaultHeaders(), extendHeaders);
-	// 	for(var i in _resultHeaders) {
-	// 		this._xhr.setRequestHeader(i, _resultHeaders[i]);
-	// 	}
-	// }
-
-	upload.prototype.checkType = function() {
+	qnUpload.prototype.checkType = function(cb) {
+		var errInfo;
 		var fileName = this.file.name;
+		var fileSize = this.file.size / 1024;
 		var imgExt = fileName.substring(fileName.lastIndexOf('.') + 1).toLowerCase();
 		if (this.imageTypeArr.indexOf(imgExt) === -1) {
-			return false;
+			errInfo = '图片格式为下面的一种:  ' + this.imageTypeArr.toString();
+			cb(errInfo);
+		} else if(fileSize > this.defaultSize) {
+			errInfo = '图片大小因控制在'+ this.defaultSize + ' 内';
+			cb(errInfo);
+		} else {
+			cb();
 		}
-		return true;
 	};
 
-	upload.prototype._getToken = function() {
-		var xhr = this.createAjax();
+	qnUpload.prototype._getToken = function(cb) {
 		var self = this;
-		xhr.open('GET', this.url, true);
-		xhr.onreadystatechange = function() {
-			if (xhr.readyState === 4 && xhr.status === 200) {
-				try {
-					self.token = JSON.parse(xhr.responseText);
-				} catch (e) {
-					e.msg = 'parse text to json error'
-					if (typeof self.errHandle === 'function') {
-						self.errHandle(e)
-					}
-				}
-			}
+		var options = {
+			method: 'GET',
+			url: this.url
 		}
-
-		xhr.onerror = function(e) {
-			if (typeof self.errHandle === 'function') {
-				e.msg = 'network error not fontQnUper self error';
-				self.errHandle(e);
-			}
+		if (typeof cb === 'function') {
+			request(options, cb);
+		} else {
+			throw new Error('when get uptoken the cb must be Function');
 		}
-		xhr.send();
 	}
 
-	upload.prototype.post = function(file, cb) {
+	qnUpload.prototype._postPrepare = function(cb) {
+		var self = this;
+		this.checkType(function(err) {
+			if (err && typeof self.errHandle === 'function') {
+				return self.errHandle(err);
+			}
+			self._getToken(function(err, tokenInfo) {
+				if (err && typeof self.errHandle === 'function') {
+					return self.errHandle(e);
+				}
+				self.token = tokenInfo;
+				if (typeof cb === 'function') {
+					cb();
+				}
+			});
+		});
+	}
+
+	qnUpload.prototype.post = function(file, cb) {
 		this.file = file;
 		var self = this;
-		if (!this.checkType()) {
-			var errInfo = '图片格式为下面的一种:  ' + this.imageTypeArr.toString();
-			if (typeof this.errHandle === 'function') {
-				return this.errHandle(errInfo);
+		var randName = genRand();
+		this._postPrepare(function() {
+			var data = new FormData();
+			data.append('file', file);
+			data.append('key', self.prefix + randName);
+			var postUrl = self.uploadUrl + self.token.uptoken + '&rand=' + Math.random(); // avoid cache
+			var options = {
+				method: 'POST',
+				url: postUrl,
+				onProgress: true,
+				data: data
 			}
-			return cb(errInfo);
-		}
-		if (!this._xhr) {
-			this._xhr = this.createAjax();
-		}
-		if (!this.token.uptoken) {
-			this._getToken();
-		}
-		var data = new FormData();
-		data.append('file', file);
-		data.append('key', this.prefix + this.key);
-
-		var postUrl = this.uploadUrl + this.token.uptoken;
-		this._xhr.open('POST', postUrl, true);
-		this._xhr.ontimeout = function() {
-			return cb('timeout');
-		}
-		this._xhr.upload.onprogress = function(e) {
-			if (typeof self.progress === 'function') {
-				self.progress(e.total, e.loaded)
-			}
-		}
-		this._xhr.onerror = function(e) {
-			if (typeof self.errHandle === 'function') {
-				e.msg = 'network error not fontQnUper self error';
-				self.errHandle(e);
-			}
-		}
-		this._xhr.onload = function() {
-			if (self._xhr.status === 200) {
-				try {
-					var returnObj = JSON.parse(self._xhr.responseText);
-				} catch (e) {
-					e.msg = 'parse text to json error'
-					if (typeof self.errHandle === 'function') {
-						self.errHandle(e)
-					}
-				}				
+			request.call(self, options, function(err, returnObj) {
+				if (err && typeof errHandle === 'function') {
+					return errHandle(err);
+				}
 				returnObj.fullImageUrl = self.domain + '/' + returnObj.key;
 				returnObj.mobileImageUrl = self.domain + '/' + returnObj.key +'?imageView2/0/w/' + self.maxMobileWidth
 				returnObj.pcImageUrl = self.domain + '/' + returnObj.key + '?imageView2/2/w/' + self.maxPcWidth;
-				return cb(null, returnObj);
-			}
-			if (self._xhr.status >= 400) {
-				return cb('error code: ' + self._xhr.status);
-			}
-		}
-		this._xhr.send(data);
+				cb(returnObj);
+			});
+		});
 	}
-
-	window.fontQnUper = upload;
+	window.frontQnUper = qnUpload;
 })();
