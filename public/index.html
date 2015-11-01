@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>图片上传自助工具</title>
+  <link rel="stylesheet" type="text/css" href="/css/index.css">
+  <script type="text/javascript" src="/js/lib/zepto.min.js"></script>
+</head>
+<body>
+  <div class="container">
+    <div class="upload-input margin-auto ">
+      <div class="select-prefix">
+        <input id="prefix" class="prefix-input" type="text" placeholder="文件地址前缀(temp/)">
+      </div>
+      <div class="upload-group">
+        <input id="upload" type="file" class="file">
+        <input id="file-btn" type="button" class="file-btn" value="选择图片">
+      </div>
+
+    </div>
+    <div class="result margin-auto " id="result-show"></div>
+  </div>
+  <script type="text/javascript" src="/js/uploader.js"></script>
+  <script type="text/javascript" src="/js/manager.js"></script>
+</body>
+</html>

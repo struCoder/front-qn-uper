@@ -1,0 +1,16 @@
+input[type="text"], input[type="button"], input[type="file"] {
+  font-weight: 400;
+  width: 100%;
+  font-size: 14px;
+  padding: .75rem 0;
+  line-height: inherit;
+  border-radius: 0;
+  text-indent: 8px;
+  outline: none;
+  border: 1px solid #41A6EF;
+}
+
+input[type="button"] {
+  background-color: #41A6EF;
+}
+

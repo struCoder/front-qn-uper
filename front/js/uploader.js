@@ -2,7 +2,7 @@
 	var STR_RAND = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
 	var DEFAULT_IMG = ['jpg', 'jpeg', 'gif', 'png', 'bmp'];
 	var DEFAULT_SIZE = 10 * 1024;	// 10MB
-	
+
 	var genRand = function(len) {
 		len = len || 16;
 		var resultStr = '';
@@ -67,7 +67,7 @@
 		} else {
 			this.imageTypeArr = DEFAULT_IMG;
 		}
-		
+
 		this.domain = options.domain; //must
 		this.url = options.tokenUrl; // must
 		this.prefix = options.prefix || 'font-qn-uper/';
@@ -145,10 +145,11 @@
 				if (err && typeof errHandle === 'function') {
 					return errHandle(err);
 				}
-				returnObj.fullImageUrl = self.domain + '/' + returnObj.key;
-				returnObj.mobileImageUrl = self.domain + '/' + returnObj.key +'?imageView2/0/w/' + self.maxMobileWidth
-				returnObj.pcImageUrl = self.domain + '/' + returnObj.key + '?imageView2/2/w/' + self.maxPcWidth;
-				cb(returnObj);
+				var imageUrlInfo = {};
+				imageUrlInfo.fullImageUrl = self.domain + '/' + returnObj.key;
+				imageUrlInfo.mobileImageUrl = self.domain + '/' + returnObj.key +'?imageView2/0/w/' + self.maxMobileWidth
+				imageUrlInfo.pcImageUrl = self.domain + '/' + returnObj.key + '?imageView2/2/w/' + self.maxPcWidth;
+				cb(imageUrlInfo);
 			});
 		});
 	}

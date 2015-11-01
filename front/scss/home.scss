@@ -1,0 +1,58 @@
+.container {
+  width: 80%;
+  height: auto;
+  margin: 0 auto;
+  margin-top: 10%;
+  border: 4px dashed #aaa;
+  padding: 20px;
+
+  .margin-auto {
+    position: relative;
+    width: 95%;
+    margin: 0 auto;
+  }
+  .upload-input {
+    width: 50%;
+    input {
+      margin-bottom: 30px;
+    }
+    .select-prefix {
+      input {
+        display: inline-block;
+      }
+      .prefix-btn {
+        width: 28%;
+        color: #fff;
+      }
+    }
+    // .upload-group {
+    //   opacity: 0;
+    //   &.show {
+    //     opacity: 1;
+    //   }
+    // }
+    .file {
+      opacity: 0;
+      z-index: 100;
+      cursor: pointer;
+    }
+    .file-btn {
+      position: absolute;
+      top: 74px;
+      z-index: -1;
+      color: #fff;
+    }
+  }
+
+  .result {
+    .pic-url {
+      padding: 4px;
+      margin-bottom: 1px;
+      border: 1px solid rgba(65, 166, 239, 0.48);
+      width: 100%;
+      height: auto;
+      word-break: break-all;
+      word-wrap: break-word;
+    }
+  }
+}
